@@ -241,5 +241,105 @@ async function kaydet(formData: FormData) {
 **Özet kural:**
 - Kendi Next.js app'inden mutation → **Server Actions**
 - API olarak dışarıya açman gerekiyor → **Route Handler**
-| Mobil uygulama da kullanacaksa | Route Handler |
-| Sadece form submit | **Server Action** daha basit |
+
+---
+
+## Authentication (NextAuth v5 / Auth.js)
+
+### Kurulum
+```bash
+npm install next-auth@beta
+```
+
+### Dosya yapısı
+```
+auth.ts                              → NextAuth config (tek merkez)
+proxy.ts                             → Her istekten önce çalışır (eski adı middleware.ts)
+app/api/auth/[...nextauth]/route.ts  → NextAuth handler
+app/login/page.tsx                   → Giriş formu
+app/korunan/page.tsx                 → Sadece giriş yapılınca erişilir
+.env.local                           → AUTH_SECRET=...
+```
+
+### auth.ts — Credentials (kullanıcı adı + şifre)
+```ts
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+
+export const { handlers, signIn, signOut, auth } = NextAuth({
+  providers: [
+    Credentials({
+      credentials: { email: {}, password: { type: "password" } },
+      authorize(credentials) {
+        // DB'den kullanıcıyı bul, şifreyi kontrol et
+        const kullanici = /* db sorgusu */;
+        if (!kullanici) return null; // null → giriş başarısız
+        return { id: kullanici.id, name: kullanici.name, email: kullanici.email };
+      },
+    }),
+  ],
+  pages: { signIn: "/login" }, // kendi login sayfan
+});
+```
+
+### API Route (zorunlu)
+```ts
+// app/api/auth/[...nextauth]/route.ts
+import { handlers } from "@/auth";
+export const { GET, POST } = handlers;
+```
+
+### Giriş — Server Action ile
+```ts
+import { signIn } from "@/auth";
+
+<form action={async (formData) => {
+  "use server";
+  await signIn("credentials", {
+    email: formData.get("email"),
+    password: formData.get("password"),
+    redirectTo: "/korunan",
+  });
+}}>
+```
+
+### Session okuma — Server Component
+```ts
+import { auth } from "@/auth";
+
+const session = await auth();
+session.user?.name   // kullanıcı adı
+session.user?.email  // email
+```
+
+### Çıkış
+```ts
+import { signOut } from "@/auth";
+
+<form action={async () => { "use server"; await signOut({ redirectTo: "/" }); }}>
+  <button type="submit">Çıkış</button>
+</form>
+```
+
+### proxy.ts — Korunan route'lar
+```ts
+// Next.js 16+ → middleware.ts yerine proxy.ts
+export { auth as proxy } from "@/auth";
+
+export const config = {
+  matcher: ["/korunan/:path*"], // bu path'lere giriş zorunlu
+};
+```
+
+### .env.local
+```
+AUTH_SECRET=rastgele_uzun_string   # node -e "require('crypto').randomBytes(32).toString('base64')"
+```
+
+### Ne zaman hangi provider?
+| Senaryo | Provider |
+|---|---|
+| Kullanıcı adı + şifre | `Credentials` |
+| Google ile giriş | `Google` |
+| GitHub ile giriş | `GitHub` |
+| Email magic link | `Resend` / `Nodemailer` |
