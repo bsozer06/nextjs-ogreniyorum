@@ -14,6 +14,7 @@ const linkler = [
   { href: "/sqlite-demo", label: "SQLite" },
   { href: "/mutating-data", label: "Mutating Data" },
   { href: "/caching", label: "Caching" },
+  { href: "/revalidating", label: "Revalidating" },
   { href: "/korunan", label: "🔒 Korunan" },
   { href: "/login", label: "Giriş" },
 ];
