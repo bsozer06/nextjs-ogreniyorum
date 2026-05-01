@@ -1,8 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // better-sqlite3 native modül olduğu için sunucuda dışarıda bırakıyoruz
   serverExternalPackages: ["better-sqlite3"],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "picsum.photos", // dış resim domain'i buraya eklenir
+      },
+    ],
+  },
 };
 
 export default nextConfig;

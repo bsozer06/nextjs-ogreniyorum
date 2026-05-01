@@ -15,6 +15,7 @@ const linkler = [
   { href: "/mutating-data", label: "Mutating Data" },
   { href: "/caching", label: "Caching" },
   { href: "/revalidating", label: "Revalidating" },
+  { href: "/image-optimization", label: "Image" },
   { href: "/korunan", label: "🔒 Korunan" },
   { href: "/login", label: "Giriş" },
 ];
