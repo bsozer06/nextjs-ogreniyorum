@@ -12,6 +12,7 @@ const linkler = [
   { href: "/api-demo", label: "API Routes" },
   { href: "/server-actions", label: "Server Actions" },
   { href: "/sqlite-demo", label: "SQLite" },
+  { href: "/mutating-data", label: "Mutating Data" },
   { href: "/korunan", label: "🔒 Korunan" },
   { href: "/login", label: "Giriş" },
 ];
